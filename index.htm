@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <fieldset>
+        <legend>Join Room</legend>
+        <table>
+            <tr><td>Room ID</td><td><input type="text" id="roomid" value="mytestapp"></td></tr>
+            <tr><td>Namespace</td><td><input type="text" id="namespace" value="yo"></td></tr>
+            <tr><td></td><td><button id="joinroom">Join</button></td></tr>
+        </table> 
+        
+    </fieldset>
+    <ul id="chatlist">
+    </ul>
+    <button id="senddrink">Send Drink</button>
+    <script type="module">
+        import {joinRoom} from 'https://cdn.skypack.dev/trystero'
+        const log = (msg)=>{
+            console.log(msg)
+            const li = document.createElement("li");
+            li.innerText=msg
+            document.getElementById("chatlist").appendChild(li);
+        }
+        document.getElementById("joinroom").addEventListener('click', ()=>{
+            roomid = document.getElementById("roomid").value
+            namespace = document.getElementById("namespace").value
+            const config = {appId: roomid}
+            const room = joinRoom(config, namespace)
+            
+            let friendId= null;
+            log("waiting for peers ...");   
+            room.onPeerJoin(peerId => {
+                log(`${peerId} joined`)
+                friendId=peerId;
+            })
+            room.onPeerLeave(peerId => log(`${peerId} left`))
+
+            const [sendDrink, getDrink] = room.makeAction('drink')
+            const [sendThankDrink, getThankDrink] = room.makeAction('thankdrink')
+            // listen for drinks sent to you
+            getDrink((data, peerId) =>{
+                log(
+                    `got a ${data.drink} with${data.withIce ? '' : 'out'} ice from ${peerId}`
+                )
+                sendThankDrink(data)
+            }
+            )
+            getThankDrink((data, peerId) =>{
+                log(
+                    `thanky you for a ${data.drink} with${data.withIce ? '' : 'out'} ice from ${peerId}`
+                )
+            }
+            )
+            
+            // buy drink for a friend
+            sendDrink({drink: 'negroni', withIce: true}, friendId)
+            // buy round for the house (second argument omitted)
+            sendDrink({drink: 'mezcal', withIce: false})
+            document.getElementById('senddrink').addEventListener('click',()=>{
+                const data = {drink: 'mezcal', withIce: false}
+                log(`sent drink ${data.drink} with${data.withIce ? '' : 'out'}`)
+                sendDrink(data)
+            });
+            //room.leave()
+        })
+        
+    </script>
+</body>
+</html>
