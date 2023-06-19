@@ -1,24 +1,266 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    
+    <title>Chat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .chat-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .sendmesg{
+            background-color: rgb(107, 205, 107);
+            text-align: left;
+        }
+        .recvmessage{
+            background-color: #f1f1f1;
+        }
+        .chat-message {
+            border-radius: 5pt;
+            padding: 7pt;
+            margin-bottom: 5pt;
+            display: inline-block;
+            position: relative;
+        }
+        .mesgwrap{
+            text-align: left;
+        }
+        .sendmesgwrap{
+            text-align: right;
+        }
+        .statwrap{
+            text-align: center;
+        }
+        .statmesg{
+            background-color: #f1f1f1;
+            border-radius: 5pt;
+            padding: 1pt;
+            padding-left: 5pt;
+            padding-right: 5pt;
+            margin-bottom: 3pt;
+            line-height: 15pt;
+            font-size: 10pt;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .chat-input {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f1f1f1;
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        .mesgtimestamp{
+            font-size: 10pt;
+            line-height: 12pt;
+            float:right;
+            list-style: 20pt;
+            display:inline-block;
+            padding-top: 3pt;
+            padding-left: 5pt;
+            bottom:5pt;
+            right:5pt;
+        }
+        .username{
+            font-size: 10pt;
+            margin-bottom: 3pt;
+            font-weight: bold;
+        }
+        #message-input{
+            background-color: #fff;
+            border-radius: 5pt;
+            padding: 5pt;
+            display:inline-block;
+            width: 100%;
+            max-height: 90vh;
+            overflow:auto;
+            margin-right: 5pt;
+        }
+        .divbutton{
+            background-color:#abc;
+            display:inline-block;
+            padding: 3pt;
+            border-radius: 10pt;
+            width: 25pt;
+            height:25pt;
+            line-height: 20pt;
+            text-align:center;
+        }
+        p{
+            margin: 1pt 0;
+        }
+       
+    </style>
 </head>
 <body>
-    <fieldset>
-        <legend>Join Room</legend>
-        <table>
-            <tr><td>Room ID</td><td><input type="text" id="roomid" value="mytestapp"></td></tr>
-            <tr><td>Namespace</td><td><input type="text" id="namespace" value="yo"></td></tr>
-            <tr><td></td><td><button id="joinroom">Join</button></td></tr>
-        </table> 
+    <div style="display: flex;">
+    <div id="sidebar" style="width:100%;transition: width 0.3s;overflow: hidden;">
+        <div style="width:100vw;">
+            <fieldset>
+                <legend>Join Room</legend>
+                <table>
+                    <tr><td>Room ID</td><td><input type="text" id="roomid" value="mytestapp"></td></tr>
+                    <tr><td>Namespace</td><td><input type="text" id="namespace" value="yo"></td></tr>
+                    <tr><td></td><td><button id="joinroom">Join</button></td></tr>
+                </table> 
+                
+            </fieldset>
+            <ul id="chatlist">
+            </ul>
+        </div>
+    </div>
+    <div style="display:none;"><button id="senddrink">Send Drink</button></div>
+    <div id="chatcontainer" class="chat-container" style="width:0; overflow: hidden;transition: width 0.3s;background-color:#abc;">
+        <div style="width: 100vw;height: 100vh;display: flex;flex-direction: column;">
+            <div style="background-color: #ccc;padding: 3pt;"><div class="divbutton" onclick="togglesidebar()" > <-</div></div>
+            <div class="chat-messages">
+                <!-- Messages will be appended here dynamically -->
+                <!--<div class="mesgwrap">
+                <div class="chat-message recvmessage"><div class="username">My Very Long Username</div>
+                <div><img src="k.png"></div>Other messag easdasd asdad asdasd asdasdasd asdasd asda asd a<div class="mesgtimestamp">12:30✔✔</div></div>
+                </div>
+                <div class="statwrap">
+                <div class="statmesg">Status Message bla joined</div>
+                </div>
+                <div class="mesgwrap">
+                <div class="chat-message recvmessage">Other messag easdasd asdad asdasd asdasdasd asdasd asda asd a<div class="mesgtimestamp">12:30✔✔</div></div>
+                </div>-->
+            </div>
+            <div class="chat-input">
+                <div type="text" id="message-input" contenteditable="true" placeholder="Type a message..." autofocus></div><div onclick="sendMessage()" class="divbutton">></div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.0/showdown.min.js"></script>
+    <script type="text/javascript" src="drawdown.js"></script>
+    <script type="text/javascript" src="simplechatbot.js"></script>
+    
+    <script>
+        const togglesidebar=()=>{
+            opensize = "100%";
+            if(document.getElementById("sidebar").style.width==opensize){
+                document.getElementById("sidebar").style.width="0%";
+                document.getElementById("chatcontainer").style.width="100%";
+            }else{
+                document.getElementById("sidebar").style.width=opensize;
+                document.getElementById("chatcontainer").style.width="50pt";
+            }
+        }
+        // JavaScript code to handle sending and receiving messages
+        var messagesContainer = document.querySelector('.chat-messages');
+        const addMessage = (message)=>{
+            var messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message');
+            messageElement.classList.add('sendmesg');
+            //messageElement.innerText = message;
+            messageElement.innerHTML = markdown(message);
+
+            var messagewrap = document.createElement('div');
+            messagewrap.classList.add('sendmesgwrap');
+            messagewrap.appendChild(messageElement);
+            messagesContainer.appendChild(messagewrap);
+        }
+        const addStatus = (message)=>{
+            var messageElement = document.createElement('div');
+            messageElement.classList.add('statmesg');
+            messageElement.classList.add('sendmesg');
+            messageElement.innerText = message;
+
+            var messagewrap = document.createElement('div');
+            messagewrap.classList.add('statwrap');
+            messagewrap.appendChild(messageElement);
+            messagesContainer.appendChild(messagewrap);
+        }
+        //addStatus("bla left the group!");
+        const addRecvMesg = (message,user,time)=>{
+            var messagewrap = document.createElement('div');
+            messagewrap.classList.add('mesgwrap');
+
+            var messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message');
+            messageElement.classList.add('recvmessage');
+            messageElement.innerText = message;
+            //messageElement.innerHTML = markdown(message);
+
+            if(user!=undefined){
+                var usernameElement = document.createElement('div');
+                usernameElement.classList.add('username');
+                usernameElement.innerText = user;
+                messageElement.insertBefore(usernameElement,messageElement.firstChild);
+            }
+            if(time!=undefined){
+                //<div class="mesgtimestamp">12:30✔✔</div>
+                var timeElement = document.createElement('div');
+                timeElement.classList.add('mesgtimestamp');
+                timeElement.innerText = time;
+                messageElement.appendChild(timeElement);
+            }
+            messagewrap.appendChild(messageElement);
+            
+            messagesContainer.appendChild(messagewrap);
+        }
         
-    </fieldset>
-    <ul id="chatlist">
-    </ul>
-    <button id="senddrink">Send Drink</button>
+        // Example function to handle sending a message
+        var sendMessage=(msg)=>{
+
+        }
+        const getDateLocalFormat = ()=>{
+            return (new Date()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        const _sendMessage=() => {
+            var input = document.getElementById('message-input');
+            var message = input.innerText.trim();
+
+            if (message !== '') {
+                addMessage(message);
+                //res = chatbotsay(message);
+                //addRecvMesg(res,"chatbot",getDateLocalFormat())
+                input.innerHTML = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                sendMessage(message);
+            }
+        }
+        // Example event listener to handle sending a message on Enter key press
+        document.getElementById('message-input').addEventListener('keydown', function(event) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                _sendMessage();
+            }
+        });
+        //addRecvMesg(chatbotsay("hi"),"chatbot",getDateLocalFormat())
+        //addMessage(chatbotsay("asdfasdf"),"chatbot",getDateLocalFormat())
+    </script>
     <script type="module">
         import {joinRoom} from 'https://cdn.skypack.dev/trystero'
         const log = (msg)=>{
@@ -26,20 +268,42 @@
             const li = document.createElement("li");
             li.innerText=msg
             document.getElementById("chatlist").appendChild(li);
+            addStatus(msg);
         }
         document.getElementById("joinroom").addEventListener('click', ()=>{
-            roomid = document.getElementById("roomid").value
-            namespace = document.getElementById("namespace").value
-            const config = {appId: roomid}
-            const room = joinRoom(config, namespace)
+            const roomid = document.getElementById("roomid").value;
+            const namespace = document.getElementById("namespace").value;
+            const config = {appId: roomid};
+            const room = joinRoom(config, namespace);
             
             let friendId= null;
             log("waiting for peers ...");   
+            togglesidebar();
             room.onPeerJoin(peerId => {
                 log(`${peerId} joined`)
                 friendId=peerId;
             })
             room.onPeerLeave(peerId => log(`${peerId} left`))
+
+            const [sendChatMsg, recvChatMsg] = room.makeAction('chatmesg');
+            const [sendChatMsgRecvValidate, recvChatMsgRecvValidate] = room.makeAction('msgvali');
+            sendMessage=(msgtext)=>{
+                const data = {
+                    "type":"text",
+                    "data":msgtext
+                };
+                sendChatMsg(data);
+            };
+            recvChatMsg((dat, peerId)=>{
+                if(dat.type=="text"){
+                    addRecvMesg(dat.data,peerId,getDateLocalFormat());
+                }
+            });
+            
+            const [sendIsTyping, getIsTyping] = room.makeAction('typing')
+            
+
+            const [sendNickname, getNichname] = room.makeAction('nickname')
 
             const [sendDrink, getDrink] = room.makeAction('drink')
             const [sendThankDrink, getThankDrink] = room.makeAction('thankdrink')
@@ -69,7 +333,7 @@
             });
             //room.leave()
         })
-        
+        document.getElementById("joinroom").click();
     </script>
 </body>
 </html>
