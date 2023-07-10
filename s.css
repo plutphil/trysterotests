@@ -89,7 +89,7 @@ body {
     margin-bottom: 3pt;
     font-weight: bold;
 }
-#message-input{
+#messageinput{
     background-color: #fff;
     border-radius: 5pt;
     padding: 5pt;
@@ -117,4 +117,19 @@ p{
 .chatstatus{
     font-size: 10pt;
 
+}
+.dialog{
+    backdrop-filter: blur(0px);
+    animation: blur 1.5s linear forwards;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    position:absolute;
+}
+.dialogcontent{
+    margin:auto;
+    border-radius:10pt;
+    padding:12pt;
+    background:#f1f1f1;
 }

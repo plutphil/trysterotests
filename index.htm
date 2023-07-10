@@ -10,25 +10,49 @@
 </head>
 <body>
     <div style="display: flex;">
-    <div id="sidebar" style="width:100%;transition: width 0.3s;overflow: hidden;">
-        <div style="width:100vw;overflow-y: auto;">
-            <fieldset>
-                <legend>Join Room</legend>
-                <table>
-                    <tr><td>Room ID</td><td><input type="text" id="roomid" value="mytestapp"></td></tr>
-                    <tr><td>Namespace</td><td><input type="text" id="namespace" value="yo"></td></tr>
-                    <tr><td>Password</td><td><input type="password" id="roompw" value=""></td></tr>
-                    <tr><td>Nickname</td><td><input type="text" id="nickname" value="yo"></td><td><button id="savenick">Save</button></td></tr>
-                    <tr><td></td><td><button id="joinroom">Join</button><button id="leaveroom" disabled>Leave</button></td></tr>
-                </table> 
-                
-            </fieldset>
-            <ul id="chatlist">
-            </ul>
+    <div id="sidebar" style="width:0%;transition: width 0.3s;overflow: hidden;background: #ccc;">
+        <div style="min-width:80vw;overflow-y: auto;">
+            <div class="chatlistsearch" style="display:flex;background-color: #ccc;padding: 3pt;">
+                <div id="nicknamebig" style="flex-grow:1;line-height:24pt;font-size:16pt">Nickname</div>
+                <div class="divbutton" id="settingsbutton">⚙</div>
+            </div>
+            <div class="chatlistsearch" style="display:flex;background: #ccc;padding: 3pt;">
+                <div type="text" class="messageinput" contenteditable="true" placeholder="Type a message..." autofocus></div>
+                <div class="divbutton">🔍</div>
+            </div>
+
+            <div class="chatlist" style="background: #ccc;flex-grow:1;">
+                <div class="chatitem" style="display:flex;background: #ccc;padding: 3pt;">
+                    <div class="divbutton" style="background:white;border-radius: 100pt;margin-left:5pt;text-align:center;font-size: 14pt;"> 
+                        😀
+                    </div>
+                    <div style="flex-grow:1;display: flex;flex-direction: column;margin-left:7pt;border-bottom:solid 1px #333;">
+                        <div>
+                            Group Name
+                        </div>
+                        <div class="groupchatstat">
+                            group status 
+                        </div>
+                    </div>
+                </div>
+                <div class="chatitem" style="display:flex;background: #ccc;padding: 3pt;">
+                    <div class="divbutton" style="background:white;border-radius: 100pt;margin-left:5pt;text-align:center;font-size: 14pt;"> 
+                        😀
+                    </div>
+                    <div style="flex-grow:1;display: flex;flex-direction: column;margin-left:7pt;border-bottom:solid 1px #333;">
+                        <div>
+                            Group Name
+                        </div>
+                        <div class="groupchatstat">
+                            group status 
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div style="display:none;"><button id="senddrink">Send Drink</button></div>
-    <div id="chatcontainer" class="chat-container" style="width:0; overflow: hidden;transition: width 0.3s;background-color:#abc;">
+    <div id="chatcontainer" class="chat-container" style="width:100%; overflow: hidden;transition: width 0.3s;background-color:#abc;">
         <div style="opacity:1;width: 100vw;height: 100vh;display: flex;flex-direction: column;">
             <div style="display:flex;background-color: #ccc;padding: 3pt;">
                 <div class="divbutton" onclick="togglesidebar()" > <</div>
@@ -37,7 +61,7 @@
                 </div>
                 <div style="flex-grow:1;display: flex;flex-direction: column;padding-left:4pt;">
                     <div>
-                        Group Name
+                        Public Group
                     </div>
                     <div class="chatstatus">
                         group status 
@@ -49,14 +73,14 @@
                 
             </div>
             <div class="chat-input">
-                <div type="text" id="message-input" contenteditable="true" placeholder="Type a message..." autofocus></div>
+                <div type="text" id="messageinput" contenteditable="true" placeholder="Type a message..." autofocus></div>
                 <div onclick="_sendMessage();" class="divbutton">></div>
             </div>
         </div>
         
     </div>
-    <div id="dialogpane" onclick="dialogclose();" style="backdrop-filter: blur(0px);animation: blur 1.5s linear forwards;width: 100vw;height: 100vh;display: none;flex-direction: column;position:absolute;">
-        <div style="margin:auto;border-radius:10pt;padding:12pt;background:#f1f1f1;">
+    <div id="dialogpane" onclick="dialogclose();" class="dialog">
+        <div class="dialogcontent">
             <div style="display: flex;line-height:25pt;border-bottom: #aaa solid 1px; padding-bottom:3pt;">
                 <div style="flex-grow: 1;padding-right: 10pt;">Confirm ?</div>
                 <div class="divbutton" onclick="dialogclose();">x</div>
@@ -66,6 +90,40 @@
             <div class="divbutton" style="width:auto;" onclick="dialogyes();">Yes</div>
             <div class="divbutton" style="float:right;" onclick="dialogno();">No</div>
             </div>
+        </div>
+    </div>
+    <div id="userdialog" onclick="dialogclose();" class="dialog">
+        <div class="dialogcontent">
+            <div style="display: flex;line-height:25pt;border-bottom: #aaa solid 1px; padding-bottom:3pt;">
+                <div style="flex-grow: 1;padding-right: 10pt;">User Info</div>
+                <div class="divbutton" onclick="dialogclose();">x</div>
+            </div>
+            <div style="margin-top:5pt;">
+                
+            <div class="divbutton" style="width:auto;" onclick="dialogyes();">Yes</div>
+            <div class="divbutton" style="float:right;" onclick="dialogno();">No</div>
+            </div>
+        </div>
+    </div>
+    <div id="settingsdialog" class="dialog" style="display:flex;">
+        <div class="dialogcontent">
+            <div style="display: flex;line-height:25pt;border-bottom: #aaa solid 1px; padding-bottom:3pt;">
+                <div style="flex-grow: 1;padding-right: 10pt;">Settings</div>
+                <div class="divbutton" onclick="document.getElementById('settingsdialog').style.display='none';">x</div>
+            </div>
+            <fieldset>
+            <legend>Join Room</legend>
+            <table>
+                <tr><td>Room ID</td><td><input type="text" id="roomid" value="mytestapp"></td></tr>
+                <tr><td>Namespace</td><td><input type="text" id="namespace" value="yo"></td></tr>
+                <tr><td>Password</td><td><input type="password" id="roompw" value=""></td></tr>
+                <tr><td>Nickname</td><td><input type="text" id="nickname" value="yo"></td><td><button id="savenick">Save</button></td></tr>
+                <tr><td></td><td><button id="joinroom">Join</button><button id="leaveroom" disabled>Leave</button></td></tr>
+            </table> 
+            
+        </fieldset>
+        <ul id="chatlist" style="height:50pt;overflow-y: auto;">
+        </ul>
         </div>
     </div>
 </div>

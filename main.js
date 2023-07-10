@@ -1,6 +1,11 @@
 var messages = [];
 let trystnick = null;
 var nicknames = {};
+function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+}
 const setnickname=(id,name)=>{
     nicknames[id]=name;
 }
@@ -10,7 +15,11 @@ if(localStorage){
 }
 if(trystnick==null){
     trystnick = generateName();
+    if(localStorage){
+        localStorage.setItem("trystnickname",trystnick);
+    }
     document.getElementById("nickname").value = trystnick;
+    document.getElementById("nicknamebig").innerText = trystnick;
 }  
 const getpeerid=id=>{
     if(id in nicknames){
@@ -18,13 +27,33 @@ const getpeerid=id=>{
     }else{
         return id;
     }
+    return "?";
+}
+var mesghash=""+Math.random();
+/**
+ * Returns a hash code from a string
+ * @param  {String} str The string to hash.
+ * @return {Number}    A 32bit integer
+ * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ */
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
 }
 if (localStorage) {
     const oldmessages = localStorage.getItem("oldmessages");
     if (oldmessages != undefined) {
         messages = JSON.parse(oldmessages);
+        mesgshash= hashCode(oldmessages);
     }
 }
+var mesglength = messages.length;
+
 const togglesidebar = (a) => {
     const opensize = "100%";
     let state = document.getElementById("sidebar").style.width == opensize;
@@ -39,8 +68,14 @@ const togglesidebar = (a) => {
         document.getElementById("chatcontainer").style.width = "50pt";
     }
 }
+
+var hashmesg = {};
 var savemessages = () => {
     localStorage.setItem("oldmessages", JSON.stringify(messages));
+    messages.forEach(m=>{
+        hashmesg[hashCode(m.data+m.user+m.time)]=m;
+
+    })
 }
 var dialogcb = () => { }
 const dialog = (onsuccess) => {
@@ -75,6 +110,9 @@ const delhist = () => {
         messagesContainer.innerHTML = "";
     })
 };
+document.getElementById("settingsbutton").onclick=()=>{
+    document.getElementById("settingsdialog").style.display="flex";
+}
 // JavaScript code to handle sending and receiving messages
 var messagesContainer = document.querySelector('.chat-messages');
 const addMessage = (message, user, time) => {
@@ -107,12 +145,12 @@ const addMessage = (message, user, time) => {
     return messageElement;
 }
 const addStatus = (message) => {
-    messages.push({
+    /*messages.push({
         type: 'stat',
         time: Date.now(),
         data: message
-    });
-    savemessages();
+    });*/
+    //savemessages();
     var messageElement = document.createElement('div');
     messageElement.classList.add('statmesg');
     messageElement.classList.add('sendmesg');
@@ -122,6 +160,7 @@ const addStatus = (message) => {
     messagewrap.classList.add('statwrap');
     messagewrap.appendChild(messageElement);
     messagesContainer.appendChild(messagewrap);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
     return messageElement;
 }
 //addStatus("bla left the group!");
@@ -170,27 +209,27 @@ const getDateLocalFormat = a => {
     }
 }
 const _sendMessage = () => {
-    var input = document.getElementById('message-input');
+    var input = document.getElementById('messageinput');
     var message = input.innerText.trim();
 
     if (message !== '') {
-        messages.push({
-            type: 'sendmsg',
-            user: "",
+        const msgobj = {
+            user: trystnick,
             time: Date.now(),
             data: message
-        });
+        }
+        messages.push(msgobj);
         savemessages();
         addMessage(message, trystnick, getDateLocalFormat()); 
         //res = chatbotsay(message);
         //addRecvMesg(res,"chatbot",getDateLocalFormat())
         input.innerHTML = '';
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        sendMessage(message);
+        sendMessage(message,msgobj.time);
     }
 }
 // Example event listener to handle sending a message on Enter key press
-document.getElementById('message-input').addEventListener('keydown', function (event) {
+document.getElementById('messageinput').addEventListener('keydown', function (event) {
     if (event.keyCode === 13 && !event.shiftKey) {
         event.preventDefault();
         _sendMessage();
@@ -217,17 +256,17 @@ if (DEBUG) {
     addMessage(chatbotsay("asdfasdf"),"",getDateLocalFormat());
     */
     messages.forEach(m => {
-        if (m.type == "sendmsg") {
-            addMessage(m.data, m.user, getDateLocalFormat(m.time));
+        if (m.user==trystnick) {
+            addMessage(m.data, trystnick, getDateLocalFormat(m.time));
         }
-        else if (m.type == "recvmsg") {
+        else {
             addRecvMesg(m.data, m.user, getDateLocalFormat(m.time));
         }
-        else if (m.type == "statmsg") {
-            addMessage(m.data);
-        }
+        /*else if (m.type == "stat") {
+            addStatus(m.data);
+        }*/
     })
-    togglesidebar();
+    //togglesidebar();
 }
 //addRecvMesg(chatbotsay("hi"),"chatbot",getDateLocalFormat())
 //addMessage(chatbotsay("asdfasdf"),"chatbot",getDateLocalFormat())
