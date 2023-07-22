@@ -1,50 +1,34 @@
 var messages = [];
-let trystnick = null;
-var nicknames = {};
-function uuidv4() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
+let username = null;
+var usernames = {};
+
+const setusername=(id,name)=>{
+    usernames[id]=name;
 }
-const setnickname=(id,name)=>{
-    nicknames[id]=name;
-}
-if(localStorage){
-    trystnick = localStorage.getItem("trystnickname"); 
-    console.log("trystnick",trystnick);
-}
-if(trystnick==null){
-    trystnick = generateName();
+username = localStorage.getItem("trystusername"); 
+console.log("username",username);
+let userid = getSetDefault("userid",()=>crypto.randomUUID()); 
+console.log("userid",userid)
+
+if(username==null){
+    username = generateName();
     if(localStorage){
-        localStorage.setItem("trystnickname",trystnick);
+        localStorage.setItem("trystusername",username);
     }
-    document.getElementById("nickname").value = trystnick;
-    document.getElementById("nicknamebig").innerText = trystnick;
+    document.getElementById("username").value = username;
+    document.getElementById("usernamebig").innerText = username;
 }  
+
 const getpeerid=id=>{
-    if(id in nicknames){
-        return nicknames[id];
+    if(id in usernames){
+        return usernames[id];
     }else{
         return id;
     }
     return "?";
 }
 var mesghash=""+Math.random();
-/**
- * Returns a hash code from a string
- * @param  {String} str The string to hash.
- * @return {Number}    A 32bit integer
- * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
- */
-function hashCode(str) {
-    let hash = 0;
-    for (let i = 0, len = str.length; i < len; i++) {
-        let chr = str.charCodeAt(i);
-        hash = (hash << 5) - hash + chr;
-        hash |= 0; // Convert to 32bit integer
-    }
-    return hash;
-}
+
 if (localStorage) {
     const oldmessages = localStorage.getItem("oldmessages");
     if (oldmessages != undefined) {
@@ -214,13 +198,13 @@ const _sendMessage = () => {
 
     if (message !== '') {
         const msgobj = {
-            user: trystnick,
+            user: username,
             time: Date.now(),
             data: message
         }
         messages.push(msgobj);
         savemessages();
-        addMessage(message, trystnick, getDateLocalFormat()); 
+        addMessage(message, username, getDateLocalFormat()); 
         //res = chatbotsay(message);
         //addRecvMesg(res,"chatbot",getDateLocalFormat())
         input.innerHTML = '';
@@ -256,8 +240,8 @@ if (DEBUG) {
     addMessage(chatbotsay("asdfasdf"),"",getDateLocalFormat());
     */
     messages.forEach(m => {
-        if (m.user==trystnick) {
-            addMessage(m.data, trystnick, getDateLocalFormat(m.time));
+        if (m.user==username) {
+            addMessage(m.data, username, getDateLocalFormat(m.time));
         }
         else {
             addRecvMesg(m.data, m.user, getDateLocalFormat(m.time));

@@ -13,7 +13,7 @@
     <div id="sidebar" style="width:0%;transition: width 0.3s;overflow: hidden;background: #ccc;">
         <div style="min-width:80vw;overflow-y: auto;">
             <div class="chatlistsearch" style="display:flex;background-color: #ccc;padding: 3pt;">
-                <div id="nicknamebig" style="flex-grow:1;line-height:24pt;font-size:16pt">Nickname</div>
+                <div id="usernamebig" style="flex-grow:1;line-height:24pt;font-size:16pt">username</div>
                 <div class="divbutton" id="settingsbutton">⚙</div>
             </div>
             <div class="chatlistsearch" style="display:flex;background: #ccc;padding: 3pt;">
@@ -117,7 +117,7 @@
                 <tr><td>Room ID</td><td><input type="text" id="roomid" value="mytestapp"></td></tr>
                 <tr><td>Namespace</td><td><input type="text" id="namespace" value="yo"></td></tr>
                 <tr><td>Password</td><td><input type="password" id="roompw" value=""></td></tr>
-                <tr><td>Nickname</td><td><input type="text" id="nickname" value="yo"></td><td><button id="savenick">Save</button></td></tr>
+                <tr><td>username</td><td><input type="text" id="username" value="yo"></td><td><button id="savenick">Save</button></td></tr>
                 <tr><td></td><td><button id="joinroom">Join</button><button id="leaveroom" disabled>Leave</button></td></tr>
             </table> 
             
@@ -131,7 +131,8 @@
     <script type="text/javascript" src="drawdown.js"></script>
     <script type="text/javascript" src="randnam.js"></script>
     <script type="text/javascript" src="simplechatbot.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
     <script type="module" src="trysterohelper.js"></script>
+    <script type="text/javascript" src="main.js"></script>
 </body>
 </html>

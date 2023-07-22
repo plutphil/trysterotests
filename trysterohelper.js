@@ -1,17 +1,10 @@
 import { joinRoom } from 'https://cdn.skypack.dev/trystero'
 
 
-const log = (msg) => {
-    console.log(msg)
-    const li = document.createElement("li");
-    li.innerText = msg
-    document.getElementById("chatlist").appendChild(li);
-    //addStatus(msg);
-}
 let chatrooms = [];
 let room = undefined;
 let allusers=[];
-let nicknameuser={};
+let usernameuser={};
 let peeriduser = {};
 let iduser = {};
 document.getElementById("leaveroom").addEventListener('click', () => {
@@ -23,7 +16,10 @@ let statusmessages = [];
 let messageselements = [];
 let sendnickcb = ()=>{};
 document.getElementById("savenick").addEventListener('click', () => {
-    localStorage.setItem("trystnickname",document.getElementById("nickname").value)
+    localStorage.setItem("trystusername",document.getElementById("username").value)
+    messageselements.forEach(e=>{
+        console.log(e);
+    })
     sendnickcb();
 });
 document.getElementById("joinroom").addEventListener('click', () => {
@@ -49,9 +45,9 @@ document.getElementById("joinroom").addEventListener('click', () => {
     //togglesidebar(true);
     document.getElementById("settingsdialog").style.display="none";
     
-    const [sendNickname, getNickname] = room.makeAction('nickname')
+    const [sendusername, getusername] = room.makeAction('username')
     sendnickcb=()=>{
-        sendNickname({nickname:trystnick});
+        sendusername({username:username});
     };
     let oldtosend = [];
     for (let i = Math.max(messages.length-11,0); i < messages.length;i++) {
@@ -74,13 +70,19 @@ document.getElementById("joinroom").addEventListener('click', () => {
     newest changes check
 
     */
+
     room.onPeerJoin(peerId => {
         log(`${peerId} joined`)
         friendId = peerId;
-        sendNickname({nickname:trystnick},peerId);
+        sendusername({
+            userid,
+            username
+        },peerId);
+        
         let peers = room.getPeers();
         console.log(peers);
         document.querySelector(".chatstatus").innerText = ""+  Object.keys(peers).length+ " peers";
+        
         let elm = addStatus("joined");
         statusmessages.push({
             type: "joined",
@@ -88,23 +90,22 @@ document.getElementById("joinroom").addEventListener('click', () => {
             time: new Date().getTime(),
             element: elm
         });
-        sendOldMessaged({messages:oldtosend});
-        
+        //sendOldMessaged({messages:oldtosend});
     })
-    getNickname((dat, peerId)=>{
+    getusername((dat, peerId)=>{
         console.log(peerId,dat);
-        nicknameuser[dat.nickname]=peerId;
-        peeriduser[peerId]=dat.nickname;
+        usernameuser[dat.username]=peerId;
+        peeriduser[peerId]=dat.username;
         if(peerId!=getpeerid(peerId)){
-            log("nickname "+peerId+" "+getpeerid(peerId)+" to "+dat.nickname);
+            log("username "+peerId+" "+getpeerid(peerId)+" to "+dat.username);
         }
-        setnickname(peerId,dat.nickname);
+        setusername(peerId,dat.username);
         statusmessages.forEach(e=>{
             e.element.innerText = getpeerid(e.peerId)+" "+e.type;
         });
         messageselements.forEach(e=>{
             try {
-                e.element.querySelector("username").innerText = nicknames[e.peerId]+" "+e.type;
+                e.element.querySelector("username").innerText = usernames[e.peerId]+" "+e.type;
             } catch (error) {
             }
         });
@@ -157,8 +158,8 @@ document.getElementById("joinroom").addEventListener('click', () => {
             const hash = hashCode(m.data+m.user+m.time)
             if(!(hash in hashmesg)){
                 messages.push(m);
-                if (m.user==trystnick) {
-                    addMessage(m.data, trystnick, getDateLocalFormat(m.time));
+                if (m.user==username) {
+                    addMessage(m.data, username, getDateLocalFormat(m.time));
                 }
                 else {
                     addRecvMesg(m.data, m.user, getDateLocalFormat(m.time));
