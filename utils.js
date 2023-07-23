@@ -28,6 +28,19 @@ const log = (msg) => {
     console.log(msg)
     const li = document.createElement("li");
     li.innerText = msg
-    document.getElementById("chatlist").appendChild(li);
+    document.getElementById("chatlog").appendChild(li);
     //addStatus(msg);
+}
+function getRandomColor() {
+    return "hsl(" + 360 * Math.random() + ',' +
+        (25 + 70 * Math.random()) + '%,' +
+        (85 + 10 * Math.random()) + '%,0.5)'
+}
+const getDateLocalFormat = a => {
+    if (a == undefined) {
+        return (new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    } else {
+        return (new Date(a)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
 }
