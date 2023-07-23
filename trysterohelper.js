@@ -16,6 +16,7 @@ let statusmessages = [];
 let messageselements = [];
 let sendnickcb = ()=>{};
 const savemessage=(mesg)=>{
+    console.log("savemsg",mesg)
     allmessages.push(mesg);
     localStorage.setItem("allmessages",JSON.stringify(allmessages));
 }
@@ -87,7 +88,6 @@ document.getElementById("joinroom").addEventListener('click', () => {
         
         if(allmessages.length>0){
             let lastmesg = allmessages[allmessages.length-1];
-            delete lastmesg["data"]; 
             console.log(lastmesg)
             if(typeof dat["lastmesg"] != undefined){
                 const recvlastmesg = dat["lastmesg"];
@@ -102,6 +102,14 @@ document.getElementById("joinroom").addEventListener('click', () => {
                     },peerId)
                 }
             }
+        }else{
+            sendmsg({
+                type:"reqoldmesg",
+                lastmesg:{
+                    time:0,
+                    userid:""
+                }
+            },peerId)
         }
 
         chat.setusername(peerId,dat.username); 
@@ -141,8 +149,6 @@ document.getElementById("joinroom").addEventListener('click', () => {
         console.log(allmessages)
         if(allmessages.length>0){
             lastmesg = allmessages[allmessages.length-1];
-            delete lastmesg["data"]; 
-            console.log(lastmesg)
         }
         if(respondtoallonjoin){
             
@@ -184,46 +190,42 @@ document.getElementById("joinroom").addEventListener('click', () => {
         sendmsg(data);
         console.log(data) 
     };
-    routes["chatmesg"]=(dat, peerId) => {
-        if (dat.type == "text") {
-            messages.push({
-                user: getpeerid(peerId),
-                data: dat.data,
-                time: dat.time
-            });
-            savemessages(); 
-
-            let elm;
-            savemessage({
-                userid: peerId2User[peerId].userid,
-                data: dat.data,
-                time: dat.time
-            });
-            if(peerId2User[peerId].userid==userid){
-                elm = chat.addSendMesg(dat.data, getpeerid(peerId), getDateLocalFormat());
-    
-            }else{
-                elm = chat.addRecvMesg(dat.data, getpeerid(peerId), getDateLocalFormat());
-            }
-            messageselements.push({
-                type: 'recvmsg',
-                user: getpeerid(peerId),
-                time: Date.now(),
-                data: dat.data,
-                element:elm
-            });
-            //sendChatMsgRecvValidate(dat,peerId)
-            var audio = new Audio('ringtone.mp3');
-            audio.play();
+    const addmesg =()=>{
+        
+    }
+    routes.chatmesg=(dat, peerId) => { 
+        savemessage({
+            userid: peerId2User[peerId].userid,
+            data: dat.data,
+            time: dat.time
+        });
+        let elm;
+        if(peerId2User[peerId].userid==userid){
+            elm = chat.addSendMesg(dat.data, getpeerid(peerId), getDateLocalFormat());
+        }else{
+            elm = chat.addRecvMesg(dat.data, getpeerid(peerId), getDateLocalFormat());
         }
+        messageselements.push({
+            type: 'recvmsg',
+            user: getpeerid(peerId),
+            time: Date.now(),
+            data: dat.data,
+            element:elm
+        });
+        //sendChatMsgRecvValidate(dat,peerId)
+        var audio = new Audio('ringtone.mp3');
+        audio.play();
+    
     };
     routes.reqoldmesg = (data, peerId)=>{
         let outlist=[];
+        let continuation = undefined;
         for (let i = allmessages.length-1; i >=0 ; i--) {
             const e = allmessages[i];
             if(e.time>data.lastmesg.time){
                 outlist.push(e);
                 if(outlist.length>10){
+                    continuation=e;
                     break;
                 }
             }
@@ -231,13 +233,25 @@ document.getElementById("joinroom").addEventListener('click', () => {
         console.log("onoldmesg",data,outlist);
         sendmsg({
             type:"oldmesg",
-            messages:outlist
+            messages:outlist.reverse(),
+            continuation
         })
     };
     routes.oldmesg = (data, peerId)=>{
         console.log(data);
         data.messages.forEach(e=>{
             console.log(e);
+            savemessage({
+                userid: e.userid,
+                data: e.data,
+                time: e.time
+            });
+            let elm;
+            if(peerId2User[peerId].userid==userid){
+                elm = chat.addSendMesg(e.data, e.peerId, getDateLocalFormat());
+            }else{
+                elm = chat.addRecvMesg(e.data, e.peerId, getDateLocalFormat());
+            }
         });
     }
     //room.leave()

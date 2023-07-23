@@ -22,6 +22,13 @@ if(localStorage.getItem("userId2User")==null){
 }
 userId2User[userid]=publicUserData2Send;
 userName2User[username]=publicUserData2Send;
+const userIdToUsername=(userid)=>{
+
+}
+const peerIdToUserId=(userid)=>{
+
+}
+
 localStorage.setItem("userId2User",JSON.stringify(userId2User))
 
 console.log("userId2User",userId2User)
@@ -50,12 +57,7 @@ if (localStorage) {
     }
 }
 var mesglength = messages.length;
-var savemessages = () => {
-    localStorage.setItem("oldmessages", JSON.stringify(messages));
-    messages.forEach(m=>{
-        chat.hashmesg[hashCode(m.data+m.user+m.time)]=m;
-    })
-}
+
 const addMessage=(uid,username,mesg,time)=>{
     let elm;
     if(uid==userid){
